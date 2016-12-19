@@ -1,0 +1,16 @@
+/* You can add global styles to this file, and also import other style files */
+circle.vehicle {
+  fill: black
+}
+
+circle.vehicle.route-type-RAIL {
+  fill: blue
+}
+
+circle.vehicle.route-type-BUS {
+  fill: orange
+}
+
+circle.vehicle.route-type-GONDOLA {
+  fill: pink
+}
