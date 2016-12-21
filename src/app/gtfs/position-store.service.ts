@@ -32,7 +32,7 @@ export class PositionStoreService {
     });
   }
 
-  getPositions() {
+  getPositions():Object {
     return this.positions
   }
 }

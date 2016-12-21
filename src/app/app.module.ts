@@ -11,6 +11,7 @@ import {ServerSideEventsService} from './server-side-events.service';
 import {MapComponent} from './stamen/map/map.component';
 import {mapCoordinatesReducer} from './reducers/map-coordinates.reducer';
 import { MappedPositionsComponent } from './gtfs/mapped-positions/mapped-positions.component';
+import { TopoJsonMapComponent } from './map/topo-json-map/topo-json-map.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { MappedPositionsComponent } from './gtfs/mapped-positions/mapped-positio
     TestTickComponent,
     SimulatedPositionsComponent,
     MapComponent,
-    MappedPositionsComponent
+    MappedPositionsComponent,
+    TopoJsonMapComponent
   ],
   imports: [
     BrowserModule,

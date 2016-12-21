@@ -3,26 +3,31 @@ import {Http, RequestOptions, Headers} from '@angular/http';
 import {PositionStoreService} from '../position-store.service';
 import * as _ from 'lodash';
 import {SimulatedPosition} from "../simulated-position";
+import {Store} from "@ngrx/store";
+import {AppState} from "../../reducers/AppState";
+import {HasMapCoordinatesStore} from "../../reducers/HasMapCoordinatesStore";
+import {MapCoordinates} from "../../models/map-coordinates";
 declare var d3: any;
 
 
 @Component({
   selector: 'gtfssim-simulated-positions',
-  templateUrl: './simulated-positions.component.html',
+  template: '<svg></svg>',
   styleUrls: ['./simulated-positions.component.css'],
   providers: [PositionStoreService]
 })
 
 
-export class SimulatedPositionsComponent implements OnInit {
+export class SimulatedPositionsComponent extends HasMapCoordinatesStore  implements OnInit {
   private zone: NgZone;
-  private d3gPosition;
-  private d3xScale;
-  private d3yScale;
+  private svg:any;
   private timeLast;
+  private mapCoordinates: MapCoordinates;
+  private positions: Object;
 
 
-  constructor(public http: Http, public elementRef: ElementRef, private positionStoreService: PositionStoreService) {
+  constructor(public http: Http, public elementRef: ElementRef, private positionStoreService: PositionStoreService, protected store: Store<AppState>) {
+    super(store);
     this.zone = new NgZone({enableLongStackTrace: false});
     this.timeLast = (new Date).getTime();
   }
@@ -31,22 +36,21 @@ export class SimulatedPositionsComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    var el: HTMLElement = this.elementRef.nativeElement;
-    let height = 600;
-    let width = 800;
-    let _this = this;
+    var self = this;
 
-    let svg = d3.select(el).append('svg');
-    svg.attr('height', height)
-      .attr('width', width);
 
-    this.d3gPosition = svg.append('g');
-    this.d3xScale = d3.scaleLinear().domain([6, 9]).range([0, width]);
-    this.d3yScale = d3.scaleLinear().domain([45, 48]).range([height, 0]);
+    var el: HTMLElement = self.elementRef.nativeElement;
 
+    this.svg = d3.select(el).selectAll('svg');
+
+    this.oMapCoordinates.subscribe(c => {
+      this.mapCoordinates = c;
+      this.render()
+    });
 
     setInterval(function () {
-      _this.render(_this.positionStoreService.getPositions())
+      self.positions =self.positionStoreService.getPositions();
+      self.render()
     }, 1000)
   }
 
@@ -57,29 +61,36 @@ export class SimulatedPositionsComponent implements OnInit {
    * Use the enter/update/exit pattern
    * @param positions
    */
-  render(positions) {
-    let _this = this;
+  render() {
+    let self = this;
+    this.svg.attr('height', this.mapCoordinates.height)
+      .attr('width', this.mapCoordinates.width);
+    if (self.positions === undefined) {
+      return;
+    }
 
     let keyFunc = function (sp) {
       return sp.tripId;
     };
-    let pos = _.values(positions);
+    let pos = _.values(self.positions);
     // var  pos = _.filter(_.values(positions), function(t){
     //   return t.routeLongName === 'IR 1707'
     // });
-    _.forEach(pos, function (p:SimulatedPosition) {
-      console.log('p', p)
+    var projection = self.mapCoordinates.projection()
+    _.forEach(pos, function (p: SimulatedPosition) {
       if (p.fromLat === undefined) {
         p.deltaPx = 0;
       } else {
+        var pCurrent = projection([p.lng, p.lat]);
+        var pFrom = projection([p.fromLng, p.fromLat]);
         p.deltaPx = Math.max(
-          Math.abs(_this.d3xScale(p.lat) - _this.d3xScale(p.fromLat)),
-          Math.abs(_this.d3xScale(p.lng) - _this.d3xScale(p.fromLng))
+          Math.abs(pFrom[0]-pCurrent[0]),
+          Math.abs(pFrom[1]-pCurrent[1])
         )
       }
     });
 
-    let dt = this.d3gPosition.selectAll('circle.vehicle')
+    let dt = this.svg.selectAll('circle.vehicle')
       .data(pos, keyFunc);
 
     //enter
@@ -96,35 +107,35 @@ export class SimulatedPositionsComponent implements OnInit {
       .style('opacity', 1);
 
     //update is last position is closer than 2 pixels away
-    this.d3gPosition.selectAll('circle.vehicle')
+    this.svg.selectAll('circle.vehicle')
       .filter(function (d) {
         return d.deltaPx <= 2;
       })
-      .attr('cx', function (d) {
-        return _this.d3xScale(d.lng)
+      .attr('cx', function (p) {
+        return projection([p.lng, p.lat])[0]
       })
-      .attr('cy', function (d) {
-        return _this.d3yScale(d.lat)
+      .attr('cy', function (p) {
+        return projection([p.lng, p.lat])[1]
       });
 
     //update if position if further than 2 pixel away
     var timeNow = (new Date).getTime();
-    this.d3gPosition.selectAll('circle.vehicle')
+    this.svg.selectAll('circle.vehicle')
       .filter(function (d) {
         return d.deltaPx > 2;
       })
       .transition()
       .duration(timeNow - this.timeLast)
       .ease(d3.easeLinear)
-      .attr('cx', function (d) {
-        return _this.d3xScale(d.lng)
+      .attr('cx', function (p) {
+        return projection([p.lng, p.lat])[0]
       })
-      .attr('cy', function (d) {
-        return _this.d3yScale(d.lat)
+      .attr('cy', function (p) {
+        return projection([p.lng, p.lat])[1]
       });
     this.timeLast = timeNow;
 
-    this.d3gPosition.selectAll('circle.vehicle')
+    this.svg.selectAll('circle.vehicle')
       .each(function (d) {
         d.fromLat = d.lat;
         d.fromLng = d.lng;

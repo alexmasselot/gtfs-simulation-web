@@ -2,14 +2,15 @@ import {Component, OnInit, ElementRef, NgZone, ViewChild} from '@angular/core';
 import {Store} from '@ngrx/store';
 
 import {MapCoordinates} from '../../models/map-coordinates';
+import {AppState} from '../../reducers/AppState'
 import {Observable} from "rxjs";
+
+
 declare var MM: any;
 declare var stamen: any;
 declare var d3: any;
 
-interface AppState {
-  mapCoordinates: MapCoordinates;
-}
+
 
 @Component({
   selector: 'gtfssim-map',
@@ -24,7 +25,7 @@ export class MapComponent implements OnInit {
   private map;
 
   constructor(public elementRef: ElementRef, private store: Store<AppState>) {
-    this.oMapCoordinates = store.select<MapCoordinates>('mapCoordinates');
+    //this.oMapCoordinates = store.select<MapCoordinates>('mapCoordinates');
   }
 
   ngAfterViewInit() {

@@ -1,16 +1,44 @@
 /* You can add global styles to this file, and also import other style files */
+html, body, .viewport {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
 circle.vehicle {
-  fill: black
+  fill: red
 }
 
 circle.vehicle.route-type-RAIL {
-  fill: blue
+  fill: #ff032c;
 }
 
 circle.vehicle.route-type-BUS {
-  fill: orange
+  fill: #ffd605;
 }
 
 circle.vehicle.route-type-GONDOLA {
-  fill: pink
+  fill: #048020
+}
+circle.vehicle.route-type-BAT {
+  fill: white;
+}
+
+svg.topo-json-map g.feature.feature-country path{
+  fill: #bbb;
+}
+
+svg.topo-json-map g.feature.feature-cantons path {
+  fill: none;
+  stroke: #888;
+  stroke-width: .7;
+}
+svg.topo-json-map g.feature.feature-lakes path   {
+  fill: steelblue;
+}
+
+svg.topo-json-map g.feature.feature-municipalities path{
+  fill: none;
+  stroke: #666;
+  stroke-width: .3;
 }
