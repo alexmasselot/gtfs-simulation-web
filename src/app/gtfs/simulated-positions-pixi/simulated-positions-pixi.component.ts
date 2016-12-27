@@ -44,18 +44,19 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
   }
 
   ngAfterViewInit() {
-    var self = this;
+    const self = this;
 
 
-    this.oMapCoordinates.subscribe(c => {
-      this.mapCoordinates = c;
-      this.render()
+    self.oMapCoordinates.subscribe(c => {
+      self.mapCoordinates = c;
+      self.render()
     });
 
     setInterval(function () {
       self.positions = self.positionStoreService.getPositions();
       self.render()
     }, 1000)
+    self.animate();
   }
 
   /**
@@ -91,8 +92,8 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
         self.graphics[sp.tripId] = g;
         g.endFill();
         var pCurrent = projection([sp.lng, sp.lat]);
-        g.x=pCurrent[0];
-        g.y=pCurrent[1];
+        g.x = pCurrent[0];
+        g.y = pCurrent[1];
         self.stage.addChild(g);
       }
       delete removedIds[sp.tripId];
@@ -118,33 +119,35 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
       g.yFrom = g.y || pFrom[1];
       g.xTo = pCurrent[0];
       g.yTo = pCurrent[1];
-      sp.fromLng= sp.lng;
-      sp.fromLat= sp.lat;
+      sp.fromLng = sp.lng;
+      sp.fromLat = sp.lat;
     });
 
-    const animate = function () {
-      const tRatio = (new Date().getTime() - tFrom) / 1000;
-      console.log('animate', tRatio)
-      if (tRatio > 1) {
-        return;
-      }
-      _.each(self.graphics, function (g) {
-        g.x = g.xFrom + tRatio * (g.xTo - g.xFrom);
-        g.y = g.yFrom + tRatio * (g.yTo - g.yFrom);
-      });
-      const temp = self.renderTexture;
-      self.renderTexture = self.renderTexture2;
-      self.renderTexture2 = temp;
-      self.outputSprite.texture = self.renderTexture;
 
-      self.renderer.render(self.stage);
-      self.stage.alpha = 0.8;
-      self.renderer.render(self.stage, self.renderTexture2);
-      self.stage.alpha = 1;
+  }
 
-      requestAnimationFrame(animate);
-    };
-    animate();
+  animate() {
+    const self = this;
+    if (self.renderer === undefined) {
+      return;
+    }
+    const tRatio = (new Date().getTime() - self.tLast) / 1000;
+    console.log('animate', tRatio)
+    _.each(self.graphics, function (g) {
+      g.x = g.xFrom + tRatio * (g.xTo - g.xFrom);
+      g.y = g.yFrom + tRatio * (g.yTo - g.yFrom);
+    });
+    const temp = self.renderTexture;
+    self.renderTexture = self.renderTexture2;
+    self.renderTexture2 = temp;
+    self.outputSprite.texture = self.renderTexture;
+
+    self.renderer.render(self.stage);
+    self.stage.alpha = 0.8;
+    self.renderer.render(self.stage, self.renderTexture2);
+    self.stage.alpha = 1;
+
+    requestAnimationFrame(function(){self.animate()});
   }
 
   initPixi() {
