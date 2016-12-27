@@ -12,6 +12,8 @@ import {MapComponent} from './stamen/map/map.component';
 import {mapCoordinatesReducer} from './reducers/map-coordinates.reducer';
 import { MappedPositionsComponent } from './gtfs/mapped-positions/mapped-positions.component';
 import { TopoJsonMapComponent } from './map/topo-json-map/topo-json-map.component';
+import { StreamStatsComponent } from './gtfs/stream-stats/stream-stats.component';
+import {streamStatsReducer} from "./reducers/steam-stats.reducer";
 
 @NgModule({
   declarations: [
@@ -20,13 +22,14 @@ import { TopoJsonMapComponent } from './map/topo-json-map/topo-json-map.componen
     SimulatedPositionsComponent,
     MapComponent,
     MappedPositionsComponent,
-    TopoJsonMapComponent
+    TopoJsonMapComponent,
+    StreamStatsComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
-    StoreModule.provideStore({mapCoordinates: mapCoordinatesReducer})
+    StoreModule.provideStore({mapCoordinates: mapCoordinatesReducer, streamStats: streamStatsReducer})
   ],
   providers: [ServerSideEventsService],
   bootstrap: [AppComponent]
