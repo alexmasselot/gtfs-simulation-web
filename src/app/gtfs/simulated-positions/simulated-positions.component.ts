@@ -1,5 +1,5 @@
 import {Component, OnInit, ElementRef, NgZone} from '@angular/core';
-import {Http, RequestOptions, Headers} from '@angular/http';
+import {Http} from '@angular/http';
 import {PositionStoreService} from '../position-store.service';
 import * as _ from 'lodash';
 import {SimulatedPosition} from "../simulated-position";
@@ -26,7 +26,10 @@ export class SimulatedPositionsComponent extends HasMapCoordinatesStore  impleme
   private positions: Object;
 
 
-  constructor(public http: Http, public elementRef: ElementRef, private positionStoreService: PositionStoreService, protected store: Store<AppState>) {
+  constructor(public http: Http,
+              public elementRef: ElementRef,
+              private positionStoreService: PositionStoreService,
+              protected store: Store<AppState>) {
     super(store);
     this.zone = new NgZone({enableLongStackTrace: false});
     this.timeLast = (new Date).getTime();

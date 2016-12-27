@@ -14,6 +14,7 @@ import { MappedPositionsComponent } from './gtfs/mapped-positions/mapped-positio
 import { TopoJsonMapComponent } from './map/topo-json-map/topo-json-map.component';
 import { StreamStatsComponent } from './gtfs/stream-stats/stream-stats.component';
 import {streamStatsReducer} from "./reducers/steam-stats.reducer";
+import { SimulatedPositionsPixiComponent } from './gtfs/simulated-positions-pixi/simulated-positions-pixi.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +24,8 @@ import {streamStatsReducer} from "./reducers/steam-stats.reducer";
     MapComponent,
     MappedPositionsComponent,
     TopoJsonMapComponent,
-    StreamStatsComponent
+    StreamStatsComponent,
+    SimulatedPositionsPixiComponent
   ],
   imports: [
     BrowserModule,
