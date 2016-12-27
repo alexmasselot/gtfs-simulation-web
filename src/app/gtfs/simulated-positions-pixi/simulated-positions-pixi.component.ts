@@ -132,7 +132,6 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
       return;
     }
     const tRatio = (new Date().getTime() - self.tLast) / 1000;
-    console.log('animate', tRatio)
     _.each(self.graphics, function (g) {
       g.x = g.xFrom + tRatio * (g.xTo - g.xFrom);
       g.y = g.yFrom + tRatio * (g.yTo - g.yFrom);
