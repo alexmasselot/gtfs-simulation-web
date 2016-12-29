@@ -1,16 +1,11 @@
 import {ActionReducer, Action} from '@ngrx/store';
 import {StreamStats} from "../models/stream-stats";
-export const SET_UPDATE_SECONDS_OF_DAY = 'SET_UPDATE_SECONDS_OF_DAY';
-export const SET_VEHICLE_COUNT = 'SET_VEHICLE_COUNT';
+export const SET_STREAM_STATS = 'SET_STREAM_STATS';
 
-export const streamStatsReducer: ActionReducer<StreamStats> = (state: StreamStats = new StreamStats(), action: Action) => {
+export const streamStatsReducer: ActionReducer<StreamStats> = (state: StreamStats = new StreamStats(0, {}), action: Action) => {
   switch (action.type) {
-    case SET_UPDATE_SECONDS_OF_DAY:
-      state.lastestSecondsOfDay=action.payload;
-      return state;
-    case SET_VEHICLE_COUNT:
-      state.vehicleCount = action.payload;
-      return state;
+    case SET_STREAM_STATS:
+      return action.payload;
     default:
       return state;
   }

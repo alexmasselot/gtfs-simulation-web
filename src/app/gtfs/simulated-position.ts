@@ -1,14 +1,16 @@
 export class SimulatedPosition {
   public fromLat:number;
-  public fromLng:Number;
+  public fromLng:number;
+  public fromSod:number;
   public deltaPx:number;
-  constructor(public lat: number,
+  constructor(public secondsOfDay: number,
+              public lat: number,
               public lng: number,
               public tripId: string,
-              public routeShortName: String,
-              public routeLongName: String,
-              public routeType: String,
-              public status: String) {
+              public routeShortName: string,
+              public routeLongName: string,
+              public routeType: string,
+              public status: string) {
   }
 
   toString() {

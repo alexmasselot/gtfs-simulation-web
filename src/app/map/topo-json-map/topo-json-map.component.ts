@@ -26,6 +26,7 @@ export class TopoJsonMapComponent extends HasMapCoordinatesStore implements OnIn
 
   ngAfterViewInit() {
     var self = this;
+
     var el: HTMLElement = self.elementRef.nativeElement;
 
     this.svg = d3.select(el).selectAll('svg');

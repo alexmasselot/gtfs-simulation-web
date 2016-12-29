@@ -8,8 +8,7 @@ export const mapCoordinatesReducer: ActionReducer<MapCoordinates> = (state: MapC
     case SET_CENTER:
       return state;
     case SET_DIMENSIONS:
-      state.setDimensions(action.payload.width, action.payload.height);
-      return state;
+      return state.setDimensions(action.payload.width, action.payload.height);
     default:
       return state;
   }

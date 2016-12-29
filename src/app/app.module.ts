@@ -10,11 +10,16 @@ import {SimulatedPositionsComponent} from './gtfs/simulated-positions/simulated-
 import {ServerSideEventsService} from './server-side-events.service';
 import {MapComponent} from './stamen/map/map.component';
 import {mapCoordinatesReducer} from './reducers/map-coordinates.reducer';
-import { MappedPositionsComponent } from './gtfs/mapped-positions/mapped-positions.component';
-import { TopoJsonMapComponent } from './map/topo-json-map/topo-json-map.component';
-import { StreamStatsComponent } from './gtfs/stream-stats/stream-stats.component';
+import {MappedPositionsComponent} from './gtfs/mapped-positions/mapped-positions.component';
+import {TopoJsonMapComponent} from './map/topo-json-map/topo-json-map.component';
+import {StreamStatsComponent} from './gtfs/stream-stats/stream-stats.component';
 import {streamStatsReducer} from "./reducers/steam-stats.reducer";
-import { SimulatedPositionsPixiComponent } from './gtfs/simulated-positions-pixi/simulated-positions-pixi.component';
+import {SimulatedPositionsPixiComponent} from './gtfs/simulated-positions-pixi/simulated-positions-pixi.component';
+import {ClockComponent} from './gtfs/clock/clock.component';
+import {latestSecondsOfDayReducer} from "./reducers/latest-seconds-of-day.reducer";
+import {LatestSecondsOfDayService} from "./gtfs/latest-seconds-of-day.service";
+import {PositionStoreService} from "./gtfs/position-store.service";
+import {StreamStatsService} from "./gtfs/stream-stats.service";
 
 @NgModule({
   declarations: [
@@ -25,15 +30,25 @@ import { SimulatedPositionsPixiComponent } from './gtfs/simulated-positions-pixi
     MappedPositionsComponent,
     TopoJsonMapComponent,
     StreamStatsComponent,
-    SimulatedPositionsPixiComponent
+    SimulatedPositionsPixiComponent,
+    ClockComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
-    StoreModule.provideStore({mapCoordinates: mapCoordinatesReducer, streamStats: streamStatsReducer})
+    StoreModule.provideStore({
+      mapCoordinates: mapCoordinatesReducer,
+      streamStats: streamStatsReducer,
+      latestSecondsOfDay: latestSecondsOfDayReducer
+    })
   ],
-  providers: [ServerSideEventsService],
+  providers: [
+    ServerSideEventsService,
+    PositionStoreService,
+    LatestSecondsOfDayService,
+    StreamStatsService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {

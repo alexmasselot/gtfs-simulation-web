@@ -17,16 +17,29 @@ declare const _: any;
 export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore implements OnInit {
   private zone: NgZone;
   private sizeTag: String = undefined;
-  private timeLast;
+  private timeLastAnimate = 0;
+  private minFrameRenderingIntervalMillis = 100;
   private mapCoordinates: MapCoordinates;
-  private positions: Object;
-  private tLast: number;
+  private projection: any;
 
+  private isStageUp = false;
   private renderer: any;
   private stage: any;
   private renderTexture: any;
   private renderTexture2: any;
   private outputSprite: any;
+
+
+  private colors = {
+    RAIL: 0xff032c,
+    BUS: 0xffd605,
+    GONDOLA: 0x048020,
+    BAT: 0xc0c0c0,
+    FERRY: 0xc0c0c0,
+    FUNICULAR:0x048020,
+    SUBWAY:0xff08e7,
+    default: 0x000000
+  };
 
   private graphics = {};
 
@@ -35,9 +48,8 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
               public positionStoreService: PositionStoreService,
               protected store: Store<AppState>) {
     super(store);
-    console.log('positionStoreService', positionStoreService)
     this.zone = new NgZone({enableLongStackTrace: false});
-    this.timeLast = (new Date).getTime();
+    this.timeLastAnimate = (new Date).getTime();
   }
 
   ngOnInit() {
@@ -46,16 +58,49 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
   ngAfterViewInit() {
     const self = this;
 
-
     self.oMapCoordinates.subscribe(c => {
       self.mapCoordinates = c;
       self.render()
     });
 
-    setInterval(function () {
-      self.positions = self.positionStoreService.getPositions();
-      self.render()
-    }, 1000)
+    self.positionStoreService.obsPositions
+      .subscribe(sp => {
+        if (!self.isStageUp) {
+          return;
+        }
+        let g = self.graphics[sp.tripId];
+        if (sp.status == 'END') {
+          if (g !== undefined) {
+            self.stage.removeChild(g);
+            delete self.graphics[sp.tripId];
+          }
+          return;
+        }
+        if (g === undefined) {
+          g = new PIXI.Graphics();
+          if(self.colors[sp.routeType] === undefined){
+            console.log(sp);
+          }
+          g.beginFill(self.colors[sp.routeType] || self.colors.default);
+          g.drawCircle(0, 0, 1.5);
+          self.graphics[sp.tripId] = g;
+          g.endFill();
+          self.stage.addChild(g);
+        }
+        var pCurrent = self.projection([sp.lng, sp.lat]);
+        g.x = pCurrent[0];
+        g.y = pCurrent[1];
+        g.toX = pCurrent[0];
+        g.toY = pCurrent[1];
+        g.secondsOfDay = sp.secondsOfDay;
+        g.fromActualTime = g.actualTime;
+        g.actualTime = new Date().getTime();
+        var pFrom = self.projection([sp.fromLng, sp.fromLat]);
+        g.fromX = pFrom[0] || g.x;
+        g.fromY = pFrom[1] || g.y;
+        g.fromSecondsOfDay = sp.fromSod;
+
+      });
     self.animate();
   }
 
@@ -70,71 +115,28 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     if ((self.renderer === undefined) || (self.sizeTag !== self._buildSizeTag())) {
       self.initPixi();
     }
-    const projection = self.mapCoordinates.projection();
-
-    /*
-     align stage graphics  (circle) with the actual positions
-     add new ones and remove old ones
-     */
-    let removedIds = {};
-    _.each(_.keys(self.graphics), function (id) {
-      removedIds[id] = true;
-    });
-    //console.log('-----------------')
-    //console.log('removeIds', _.keys(removedIds))
-    //console.log('graphics', _.keys(self.graphics))
-    //console.log('positions', _.map(self.positions, 'tripId'))
-    _.each(self.positions, function (sp: SimulatedPosition) {
-      if (self.graphics[sp.tripId] === undefined) {
-        const g = new PIXI.Graphics();
-        g.beginFill(0xe74c3c);
-        g.drawCircle(0, 0, 2);
-        self.graphics[sp.tripId] = g;
-        g.endFill();
-        var pCurrent = projection([sp.lng, sp.lat]);
-        g.x = pCurrent[0];
-        g.y = pCurrent[1];
-        self.stage.addChild(g);
-      }
-      delete removedIds[sp.tripId];
-    });
-    //console.log('-- removeIds', _.keys(removedIds))
-    _.each(removedIds, function (undefined, id) {
-      self.stage.removeChild(self.graphics[id]);
-      delete self.graphics[id];
-    });
-    //console.log('=> graphics', _.keys(self.graphics))
-
-    console.log('rendering +', _.size(self.graphics), '(', _.size(self.positions), ') -', _.size(removedIds));
-
-    const tFrom = new Date().getTime();
-    console.log(tFrom - self.tLast);
-    self.tLast = tFrom;
-
-    _.each(self.positions, function (sp: SimulatedPosition) {
-      let g = self.graphics[sp.tripId]
-      var pCurrent = projection([sp.lng, sp.lat]);
-      var pFrom = projection([sp.fromLng, sp.fromLat]);
-      g.xFrom = g.x || pFrom[0];
-      g.yFrom = g.y || pFrom[1];
-      g.xTo = pCurrent[0];
-      g.yTo = pCurrent[1];
-      sp.fromLng = sp.lng;
-      sp.fromLat = sp.lat;
-    });
-
-
   }
 
   animate() {
     const self = this;
-    if (self.renderer === undefined) {
+    if (!self.isStageUp) {
       return;
     }
-    const tRatio = (new Date().getTime() - self.tLast) / 1000;
+    const t = new Date().getTime();
+    if ((t - self.timeLastAnimate) < self.minFrameRenderingIntervalMillis) {
+      requestAnimationFrame(function () {
+        self.animate()
+      });
+      return;
+    }
+    self.timeLastAnimate = t;
     _.each(self.graphics, function (g) {
-      g.x = g.xFrom + tRatio * (g.xTo - g.xFrom);
-      g.y = g.yFrom + tRatio * (g.yTo - g.yFrom);
+      let tRatio = (t - g.fromActualTime) / (g.actualTime - g.fromActualTime);
+      if(tRatio>3){
+        tRatio = 3;
+      }
+      g.x = g.fromX + tRatio * (g.toX - g.fromX);
+      g.y = g.fromY + tRatio * (g.toY - g.fromY);
     });
     const temp = self.renderTexture;
     self.renderTexture = self.renderTexture2;
@@ -146,7 +148,9 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     self.renderer.render(self.stage, self.renderTexture2);
     self.stage.alpha = 1;
 
-    requestAnimationFrame(function(){self.animate()});
+    requestAnimationFrame(function () {
+      self.animate()
+    });
   }
 
   initPixi() {
@@ -156,7 +160,9 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     if (self.renderer !== undefined) {
       el.removeChild(self.renderer.view);
     }
+    self.sizeTag = self._buildSizeTag();
 
+    self.projection = self.mapCoordinates.projection();
     self.renderer = PIXI.autoDetectRenderer(this.mapCoordinates.width, this.mapCoordinates.height, {
       antialias: true,
       transparent: true,
@@ -172,7 +178,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     el.appendChild(self.renderer.view);
     self.stage = new PIXI.Container();
     self.stage.addChild(self.outputSprite);
-    self.sizeTag = self._buildSizeTag();
+    self.isStageUp = true;
   }
 
   _buildSizeTag() {

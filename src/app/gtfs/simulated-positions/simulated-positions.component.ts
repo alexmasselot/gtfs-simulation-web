@@ -52,7 +52,7 @@ export class SimulatedPositionsComponent extends HasMapCoordinatesStore  impleme
     });
 
     setInterval(function () {
-      self.positions =self.positionStoreService.getPositions();
+      //self.positions =self.positionStoreService.getPositions();
       self.render()
     }, 1000)
   }

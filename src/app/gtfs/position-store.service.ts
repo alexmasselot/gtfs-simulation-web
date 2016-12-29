@@ -1,48 +1,35 @@
 import {Injectable} from '@angular/core';
 import {ServerSideEventsService} from '../server-side-events.service';
 import {SimulatedPosition} from './simulated-position'
-import {Store} from "@ngrx/store";
-import {AppState} from "../reducers/AppState";
-import {SET_UPDATE_SECONDS_OF_DAY} from "../reducers/steam-stats.reducer";
+import {Observable} from "rxjs";
 
 @Injectable()
 export class PositionStoreService {
-  private positions = {};
+  private positionCache = {};
+  public obsPositions:Observable<SimulatedPosition>;
 
-  constructor(private serverSideEventsService: ServerSideEventsService, private store:Store<AppState>) {
-    this.subscribeToPositions();
-  }
-
-  subscribeToPositions() {//:Observable < SimulatedPosition > {
-    let self = this;
-    let observable = this.serverSideEventsService.streamObservable('http://localhost:9000/simulator/positions')
-    observable.subscribe({
-      next: x => {
-        let dt = JSON.parse(x);
-        if (dt.status === 'END') {
-          delete self.positions[dt.tripId];
-          return;
+  constructor(private serverSideEventsService: ServerSideEventsService) {
+    const self = this;
+    self.obsPositions = this.serverSideEventsService
+      .streamObservable('http://localhost:9000/simulator/positions')
+      .map(function (x){
+        const dt = JSON.parse(x);
+        const sp = new SimulatedPosition(dt.secondsOfDay, dt.lat, dt.lng, dt.tripId, dt.routeShortName, dt.routeLongName, dt.routeType, dt.status);
+        let spCache = self.positionCache[sp.tripId];
+        if(spCache !== undefined){
+          sp.fromLat = spCache.lat;
+          sp.fromLng = spCache.lng;
+          sp.fromSod = spCache.sod;
+        }else{
+          spCache = self.positionCache[sp.tripId] = {};
         }
-        if (self.positions[dt.tripId] !== undefined) {
-          var sp = self.positions[dt.tripId];
-          sp.lat=dt.lat;
-          sp.lng=dt.lng;
-        } else {
-          self.positions[dt.tripId] = new SimulatedPosition(dt.lat, dt.lng, dt.tripId, dt.routeShortName, dt.routeLongName, dt.routeType, dt.status);
-        }
-      },
-      error: err => console.error('ERROR' + err)
-    });
-    observable.subscribe({
-      next: x => {
-        let dt = JSON.parse(x);
-        this.store.dispatch({type: SET_UPDATE_SECONDS_OF_DAY, payload:dt.secondsOfDay});
-      }
-
-  })
+        spCache.lat=sp.lat;
+        spCache.lng=sp.lng;
+        spCache.sod =sp.secondsOfDay;
+        return sp;
+      });
   }
 
-  getPositions():Object {
-    return this.positions
-  }
+
+
 }
