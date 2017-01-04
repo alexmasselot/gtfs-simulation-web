@@ -1,8 +1,11 @@
 export class StreamStats {
-  public countTotat:number;
+  public countTotal:number;
   public countPerVehicleType:Object;
-  constructor(countTotat: number, countPerVehicleType:Object) {
-    this.countTotat = countTotat;
+  public eventRate:number;
+
+  constructor(countTotal: number, countPerVehicleType:Object, eventRate:number) {
+    this.countTotal = countTotal;
     this.countPerVehicleType = countPerVehicleType;
+    this.eventRate = eventRate;
   }
 }

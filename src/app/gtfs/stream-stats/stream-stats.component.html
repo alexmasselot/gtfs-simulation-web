@@ -1,3 +1,25 @@
-<p>
-  {{streamStats.countTotal}}
-</p>
+<div class="stream-stats-container">
+  <div>
+    <table>
+      <thead>
+      <th>Name</th>
+      <th>Index</th>
+      </thead>
+      <tbody>
+      <tr *ngFor="let vc of topVehiclesTypes">
+        <td>{{vc.vehicleType}} </td>
+        <td>{{vc.count}}</td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td>{{streamStats.countTotal}}</td>
+      </tr>
+      <tr>
+        <td>Events/seconds</td>
+        <td>{{streamStats.eventRate}}</td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>

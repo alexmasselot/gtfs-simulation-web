@@ -17,9 +17,8 @@ import {streamStatsReducer} from "./reducers/steam-stats.reducer";
 import {SimulatedPositionsPixiComponent} from './gtfs/simulated-positions-pixi/simulated-positions-pixi.component';
 import {ClockComponent} from './gtfs/clock/clock.component';
 import {latestSecondsOfDayReducer} from "./reducers/latest-seconds-of-day.reducer";
-import {LatestSecondsOfDayService} from "./gtfs/latest-seconds-of-day.service";
 import {PositionStoreService} from "./gtfs/position-store.service";
-import {StreamStatsService} from "./gtfs/stream-stats.service";
+import {simulationPositionSnapshotReducer} from "./reducers/simulated-position-snapshot.reducer";
 
 @NgModule({
   declarations: [
@@ -40,14 +39,13 @@ import {StreamStatsService} from "./gtfs/stream-stats.service";
     StoreModule.provideStore({
       mapCoordinates: mapCoordinatesReducer,
       streamStats: streamStatsReducer,
-      latestSecondsOfDay: latestSecondsOfDayReducer
+      latestSecondsOfDay: latestSecondsOfDayReducer,
+      simulatedPositionSnapshot: simulationPositionSnapshotReducer
     })
   ],
   providers: [
     ServerSideEventsService,
-    PositionStoreService,
-    LatestSecondsOfDayService,
-    StreamStatsService
+    PositionStoreService
   ],
   bootstrap: [AppComponent]
 })

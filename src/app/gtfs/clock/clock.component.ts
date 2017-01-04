@@ -1,20 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import {LatestSecondsOfDayService} from "../latest-seconds-of-day.service";
 import {Store} from "@ngrx/store";
 import {AppState} from "../../reducers/AppState";
 
 @Component({
   selector: 'gtfssim-clock',
   templateUrl: './clock.component.html',
-  styleUrls: ['./clock.component.css'],
-  providers: [LatestSecondsOfDayService]
+  styleUrls: ['./clock.component.css']
 })
 export class ClockComponent implements OnInit {
   public secondsOfDay: Number;
   public secondsOfDayFormated: String;
 
   // declare it in the construcore just to instantiate it... must be a better way
-  constructor(private latestSecondsOfDayService:LatestSecondsOfDayService, private store:Store<AppState>) { }
+  constructor(private store:Store<AppState>) { }
 
   ngOnInit() {
     const self = this;

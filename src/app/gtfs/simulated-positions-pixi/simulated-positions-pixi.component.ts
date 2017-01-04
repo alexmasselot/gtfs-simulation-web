@@ -6,6 +6,8 @@ import {Store} from "@ngrx/store";
 import {AppState} from "../../reducers/AppState";
 import {HasMapCoordinatesStore} from "../../reducers/HasMapCoordinatesStore";
 import {MapCoordinates} from "../../models/map-coordinates";
+import {SimulatedPositionSnapshot} from "../simulated-position-snapshot";
+import {Observable} from "rxjs";
 declare const PIXI: any;
 declare const _: any;
 
@@ -36,8 +38,8 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     GONDOLA: 0x048020,
     BAT: 0xc0c0c0,
     FERRY: 0xc0c0c0,
-    FUNICULAR:0x048020,
-    SUBWAY:0xff08e7,
+    FUNICULAR: 0x048020,
+    SUBWAY: 0xff08e7,
     default: 0x000000
   };
 
@@ -50,6 +52,11 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     super(store);
     this.zone = new NgZone({enableLongStackTrace: false});
     this.timeLastAnimate = (new Date).getTime();
+
+    var clicks = Observable.fromEvent(document, 'click');
+    var buffered = clicks.bufferCount(2);
+    buffered.subscribe(x => console.log(x));
+
   }
 
   ngOnInit() {
@@ -63,44 +70,77 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
       self.render()
     });
 
-    self.positionStoreService.obsPositions
-      .subscribe(sp => {
+    self.store.select<SimulatedPositionSnapshot>('simulatedPositionSnapshot').subscribe(
+      (sps: SimulatedPositionSnapshot) => {
         if (!self.isStageUp) {
           return;
         }
-        let g = self.graphics[sp.tripId];
-        if (sp.status == 'END') {
+        //console.log('+', sps.newIds.length, '-', sps.deletedIds.length, '|', _.size(sps.positions));
+        //delete the terminated vehicles
+        _.each(sps.deletedIds, function (id) {
+          let g = self.graphics[id];
           if (g !== undefined) {
             self.stage.removeChild(g);
-            delete self.graphics[sp.tripId];
+            delete self.graphics[id];
           }
-          return;
-        }
-        if (g === undefined) {
-          g = new PIXI.Graphics();
-          if(self.colors[sp.routeType] === undefined){
-            console.log(sp);
-          }
-          g.beginFill(self.colors[sp.routeType] || self.colors.default);
-          g.drawCircle(0, 0, 1.5);
-          self.graphics[sp.tripId] = g;
-          g.endFill();
-          self.stage.addChild(g);
-        }
-        var pCurrent = self.projection([sp.lng, sp.lat]);
-        g.x = pCurrent[0];
-        g.y = pCurrent[1];
-        g.toX = pCurrent[0];
-        g.toY = pCurrent[1];
-        g.secondsOfDay = sp.secondsOfDay;
-        g.fromActualTime = g.actualTime;
-        g.actualTime = new Date().getTime();
-        var pFrom = self.projection([sp.fromLng, sp.fromLat]);
-        g.fromX = pFrom[0] || g.x;
-        g.fromY = pFrom[1] || g.y;
-        g.fromSecondsOfDay = sp.fromSod;
+        });
 
-      });
+        var createGraphics = function (sp: SimulatedPosition) {
+          let g = self.graphics[sp.tripId];
+          if (g === undefined) {
+            g = new PIXI.Graphics();
+            if (self.colors[sp.routeType] === undefined) {
+              console.log(sp);
+            }
+            g.beginFill(self.colors[sp.routeType] || self.colors.default);
+            g.drawCircle(0, 0, 1.5);
+            self.graphics[sp.tripId] = g;
+            g.endFill();
+            self.stage.addChild(g);
+          }
+        };
+
+        //create graphics for the new ones
+        _.each(sps.newIds, function (id) {
+          let g = self.graphics[id];
+          let sp = sps.positions[id];
+          if (g === undefined) {
+            g = new PIXI.Graphics();
+            if (self.colors[sp.routeType] === undefined) {
+              console.log(sp);
+            }
+            g.beginFill(self.colors[sp.routeType] || self.colors.default);
+            g.drawCircle(0, 0, 1.5);
+            self.graphics[sp.tripId] = g;
+            g.endFill();
+            self.stage.addChild(g);
+          }
+        });
+
+        _.each(sps.positions, function (sp) {
+
+          let g = self.graphics[sp.tripId];
+
+          var pCurrent = self.projection([sp.lng, sp.lat]);
+          g.x = pCurrent[0];
+          g.y = pCurrent[1];
+          g.toX = pCurrent[0];
+          g.toY = pCurrent[1];
+          g.secondsOfDay = sp.secondsOfDay;
+          g.fromActualTime = g.actualTime;
+          g.actualTime = new Date().getTime();
+          var pFrom = self.projection([sp.fromLng, sp.fromLat]);
+          g.fromX = pFrom[0] || g.x;
+          g.fromY = pFrom[1] || g.y;
+          g.fromSecondsOfDay = sp.fromSod;
+
+        });
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+
     self.animate();
   }
 
@@ -131,8 +171,8 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     }
     self.timeLastAnimate = t;
     _.each(self.graphics, function (g) {
-      let tRatio = (t - g.fromActualTime) / (g.actualTime - g.fromActualTime);
-      if(tRatio>3){
+      let tRatio = (t - g.fromActualTime) / (g.actualTime - g.fromActualTime)-1;
+      if (tRatio > 3) {
         tRatio = 3;
       }
       g.x = g.fromX + tRatio * (g.toX - g.fromX);
