@@ -9,16 +9,45 @@ circle.vehicle {
   fill: red
 }
 
+text.histo.title{
+  text-anchor:middle;
+  font-size:120%;
+  font-weight: bold;
+  fill: #444;
+}
+
+g.histo.legend.events-per-second text.name{
+  text-anchor: end;
+}
+
+g.histo.vehicle path {
+  fill:none;
+  stroke:grey;
+  stroke-width:1
+}
+
+g.histo.vehicle.route-type-RAIL path {
+  stroke:#ff032c;
+}
 circle.vehicle.route-type-RAIL {
   fill: #ff032c;
 }
 
+g.histo.vehicle.route-type-BUS path {
+  stroke:#ffd605;
+}
 circle.vehicle.route-type-BUS {
   fill: #ffd605;
 }
 
+g.histo.vehicle.route-type-GONDOLA path {
+  stroke:#048020;
+}
 circle.vehicle.route-type-GONDOLA {
   fill: #048020
+}
+g.histo.vehicle.route-type-BAT path {
+  stroke:#lightgray;
 }
 circle.vehicle.route-type-BAT {
   fill: white;

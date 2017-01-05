@@ -10,5 +10,5 @@ export const latestSecondsOfDayReducer: ActionReducer<Number> = (state: Number =
     default:
       return state;
   }
-}
+};
 

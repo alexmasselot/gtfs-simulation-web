@@ -1,4 +1,12 @@
-font {
+@font-face {
   font-family: 'AlarmClock';
-  src: url('./alarm-clock.ttf') format('truetype')
+  src: url('./alarm-clock.ttf')
+}
+div.clock {
+  position:absolute;
+  top:40px;
+  left:80px;
+  font-family: monospace;
+  font-size:180%;
+  font-weight: bold;
 }

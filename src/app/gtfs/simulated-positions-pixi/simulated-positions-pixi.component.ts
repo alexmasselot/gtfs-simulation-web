@@ -208,7 +208,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
       transparent: true,
       resolution: 1
     });
-    self.renderer.view.style.border = "1px solid black";
+    //self.renderer.view.style.border = "1px solid black";
     self.renderTexture = PIXI.RenderTexture.create(self.renderer.width, self.renderer.height);
     self.renderTexture2 = PIXI.RenderTexture.create(self.renderer.width, self.renderer.height);
     self.outputSprite = new PIXI.Sprite(self.renderTexture);

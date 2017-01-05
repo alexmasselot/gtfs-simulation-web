@@ -18,28 +18,45 @@ export class PositionStoreService {
   private bufferPositions = {}
 
   private lastTimeMillis: number = 0;
+  private latestSecondsOfDay: number;
 
   constructor(private serverSideEventsService: ServerSideEventsService, private store: Store<AppState>) {
     const self = this;
-     this.serverSideEventsService
+    this.serverSideEventsService
       .streamObservable('http://localhost:9000/simulator/positions')
       .map(function (x) {
         const dt = JSON.parse(x);
         return new SimulatedPosition(dt.secondsOfDay, dt.lat, dt.lng, dt.tripId, dt.routeShortName, dt.routeLongName, dt.routeType, dt.status);
       })
-       .filter(function(sp:SimulatedPosition){
-         return true//trsp.routeLongName.startsWith('IR 1707');
-       })
-       .bufferTime(1000).subscribe((sps: Array<SimulatedPosition>) => {
+      .filter(function (sp: SimulatedPosition) {
+        return true//trsp.routeLongName.startsWith('IR 1707');
+      })
+      .bufferTime(1000).subscribe((sps: Array<SimulatedPosition>) => {
 
       /* build the ates position snapshots */
       const newIds = [];
       const deletedIds = [];
       const positions = {};
+
+      // if we had no new from a vehicle for 10 minutes, let's assume it's out
+      const sodTooOld = self.latestSecondsOfDay - 10 * 60
+      const tooOldIds = {}
+      _.chain(self.bufferPositions)
+        .values()
+        .filter(function (sp: SimulatedPosition) {
+          return sp.secondsOfDay < sodTooOld;
+        })
+        .each(function (sp: SimulatedPosition) {
+          tooOldIds[sp.tripId] = true;
+        })
+        .value();
+
+
       _.chain(sps)
         .keyBy('tripId')
         .each(function (sp: SimulatedPosition) {
           const id = sp.tripId;
+          delete tooOldIds[id];
           if (sp.status === 'END') {
             deletedIds.push(id);
             delete self.bufferPositions[id];
@@ -67,6 +84,14 @@ export class PositionStoreService {
 
         })
         .value();
+
+      _.chain(tooOldIds)
+        .keys()
+        .each(function (id) {
+          deletedIds.push(id);
+          delete self.bufferPositions[id];
+        })
+        .value();
       const positionSnapshot = new SimulatedPositionSnapshot(positions, deletedIds, newIds);
 
       /* build stream statistics*/
@@ -78,7 +103,11 @@ export class PositionStoreService {
       const countTotal = _.sum(_.values(countPerVehicleType));
       const rate = Math.round(_.size(sps) * 1000 / (t - self.lastTimeMillis));
       self.lastTimeMillis = t;
-      const streamStats = new StreamStats(countTotal, countPerVehicleType, rate);
+
+      if (sps.length > 0) {
+        self.latestSecondsOfDay = sps[sps.length - 1].secondsOfDay;
+      }
+      const streamStats = new StreamStats(countTotal, countPerVehicleType, rate, self.latestSecondsOfDay);
 
 
       /*
