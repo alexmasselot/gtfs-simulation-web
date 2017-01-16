@@ -9,8 +9,10 @@ import {StreamStats} from "../models/stream-stats";
 import {SET_UPDATE_SECONDS_OF_DAY} from "../reducers/latest-seconds-of-day.reducer";
 import {SimulatedPositionSnapshot} from "./simulated-position-snapshot";
 import {UPDATE_POSITIONS} from "../reducers/simulated-position-snapshot.reducer";
+import {MapCoordinates} from "../models/map-coordinates";
 
 declare const _: any;
+declare const EventSource: any;
 
 @Injectable()
 export class PositionStoreService {
@@ -19,19 +21,53 @@ export class PositionStoreService {
 
   private lastTimeMillis: number = 0;
   private latestSecondsOfDay: number;
+  private obsPosition: Observable<SimulatedPosition>;
+  private eventSource: any;
+  private bufferTimeInterval = 1000;
 
-  constructor(private serverSideEventsService: ServerSideEventsService, private store: Store<AppState>) {
+  private urlRoot = 'http://localhost:9000/simulator';
+  private urlEndPoint = 'positions-ch'
+
+  constructor(private store: Store<AppState>) {
     const self = this;
-    this.serverSideEventsService
-      .streamObservable('http://localhost:9000/simulator/positions')
-      .map(function (x) {
-        const dt = JSON.parse(x);
-        return new SimulatedPosition(dt.secondsOfDay, dt.lat, dt.lng, dt.tripId, dt.routeShortName, dt.routeLongName, dt.routeType, dt.status);
-      })
-      .filter(function (sp: SimulatedPosition) {
-        return true//trsp.routeLongName.startsWith('IR 1707');
-      })
-      .bufferTime(1000).subscribe((sps: Array<SimulatedPosition>) => {
+    self.store.select<MapCoordinates>('mapCoordinates').subscribe(mc =>
+      self.setBoundCoordinates(mc)
+    )
+    self._setupObservable()
+  }
+
+  setBoundCoordinates(mc: MapCoordinates) {
+    const self = this;
+    self.urlEndPoint = 'positions-bounded?minLat=' + mc.minLat + '&minLng=' + mc.minLng + '&maxLat=' + mc.maxLat + '&maxLng=' + mc.maxLng;
+    if ((mc.maxLat - mc.minLat) < 0.7 && (mc.maxLng - mc.minLng) < 0.7) {
+      self.urlEndPoint = self.urlEndPoint+'&cityTransit=true&accelerationFactor=100'
+      self.bufferTimeInterval = 200;
+    }else{
+      self.bufferTimeInterval = 1000;
+    }
+    self._setupObservable()
+  }
+
+  _setupObservable() {
+    const self = this;
+    if (self.eventSource !== undefined) {
+      self.eventSource.close();
+    }
+    self.eventSource = new EventSource(self.urlRoot + '/' + self.urlEndPoint);
+
+    self.obsPosition = Observable.create(observer => {
+      self.eventSource.onmessage = x => observer.next(x.data);
+      self.eventSource.onerror = x => observer.error(x);
+      return () => {
+        self.eventSource.close();
+      };
+    }).map(function (x) {
+      const dt = JSON.parse(x);
+      return new SimulatedPosition(dt.secondsOfDay, dt.lat, dt.lng, dt.tripId, dt.routeShortName, dt.routeLongName, dt.routeType, dt.status);
+    });
+
+
+    self.obsPosition.bufferTime(self.bufferTimeInterval).subscribe((sps: Array<SimulatedPosition>) => {
 
       /* build the ates position snapshots */
       const newIds = [];
@@ -114,16 +150,16 @@ export class PositionStoreService {
        dispatching the current status to various stores
        */
       if (sps.length > 0) {
-        store.dispatch({
+        self.store.dispatch({
           type: SET_UPDATE_SECONDS_OF_DAY,
           payload: sps[sps.length - 1].secondsOfDay
         });
       }
-      store.dispatch({
+      self.store.dispatch({
         type: SET_STREAM_STATS,
         payload: streamStats
       });
-      store.dispatch({
+      self.store.dispatch({
         type: UPDATE_POSITIONS,
         payload: positionSnapshot
       })

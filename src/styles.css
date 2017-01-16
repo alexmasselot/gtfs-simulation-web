@@ -40,6 +40,9 @@ circle.vehicle.route-type-BUS {
   fill: #ffd605;
 }
 
+circle.vehicle.route-type-TRAM {
+  fill: #0028ff;
+}
 g.histo.vehicle.route-type-GONDOLA path {
   stroke:#048020;
 }

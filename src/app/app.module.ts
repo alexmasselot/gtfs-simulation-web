@@ -19,6 +19,10 @@ import {ClockComponent} from './gtfs/clock/clock.component';
 import {latestSecondsOfDayReducer} from "./reducers/latest-seconds-of-day.reducer";
 import {PositionStoreService} from "./gtfs/position-store.service";
 import {simulationPositionSnapshotReducer} from "./reducers/simulated-position-snapshot.reducer";
+import {Routes, RouterModule} from "@angular/router";
+const appRoutes: Routes = [
+  {path: '**', component: MappedPositionsComponent}
+];
 
 @NgModule({
   declarations: [
@@ -41,7 +45,8 @@ import {simulationPositionSnapshotReducer} from "./reducers/simulated-position-s
       streamStats: streamStatsReducer,
       latestSecondsOfDay: latestSecondsOfDayReducer,
       simulatedPositionSnapshot: simulationPositionSnapshotReducer
-    })
+    }),
+    RouterModule.forRoot(appRoutes)
   ],
   providers: [
     ServerSideEventsService,

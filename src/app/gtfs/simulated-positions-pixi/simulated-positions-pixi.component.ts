@@ -20,7 +20,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
   private zone: NgZone;
   private sizeTag: String = undefined;
   private timeLastAnimate = 0;
-  private minFrameRenderingIntervalMillis = 100;
+  private minFrameRenderingIntervalMillis = 50;
   private mapCoordinates: MapCoordinates;
   private projection: any;
 
@@ -40,6 +40,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     FERRY: 0xc0c0c0,
     FUNICULAR: 0x048020,
     SUBWAY: 0xff08e7,
+    TRAM: 0x0028ff,
     default: 0x000000
   };
 
@@ -67,6 +68,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
 
     self.oMapCoordinates.subscribe(c => {
       self.mapCoordinates = c;
+      self.projection = self.mapCoordinates.projection;
       self.render()
     });
 
@@ -90,7 +92,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
           if (g === undefined) {
             g = new PIXI.Graphics();
             if (self.colors[sp.routeType] === undefined) {
-              console.log(sp);
+              //console.log(sp);
             }
             g.beginFill(self.colors[sp.routeType] || self.colors.default);
             g.drawCircle(0, 0, 1.5);
@@ -107,7 +109,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
           if (g === undefined) {
             g = new PIXI.Graphics();
             if (self.colors[sp.routeType] === undefined) {
-              console.log(sp);
+              //console.log(sp);
             }
             g.beginFill(self.colors[sp.routeType] || self.colors.default);
             g.drawCircle(0, 0, 1.5);
@@ -172,8 +174,8 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     self.timeLastAnimate = t;
     _.each(self.graphics, function (g) {
       let tRatio = (t - g.fromActualTime) / (g.actualTime - g.fromActualTime)-1;
-      if (tRatio > 3) {
-        tRatio = 3;
+      if (tRatio > 2) {
+        tRatio = 2;
       }
       g.x = g.fromX + tRatio * (g.toX - g.fromX);
       g.y = g.fromY + tRatio * (g.toY - g.fromY);
@@ -184,7 +186,7 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     self.outputSprite.texture = self.renderTexture;
 
     self.renderer.render(self.stage);
-    self.stage.alpha = 0.8;
+    self.stage.alpha = 0.95;
     self.renderer.render(self.stage, self.renderTexture2);
     self.stage.alpha = 1;
 
@@ -202,7 +204,6 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     }
     self.sizeTag = self._buildSizeTag();
 
-    self.projection = self.mapCoordinates.projection();
     self.renderer = PIXI.autoDetectRenderer(this.mapCoordinates.width, this.mapCoordinates.height, {
       antialias: true,
       transparent: true,
