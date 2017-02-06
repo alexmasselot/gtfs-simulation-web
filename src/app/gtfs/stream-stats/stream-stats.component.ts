@@ -22,7 +22,12 @@ export class StreamStatsComponent implements OnInit {
   private topVehiclesTypes = [];
 
   private svg: any;
+  private elXAxis:any;
+  private elYAxis:any;
   private histoPoints = {};
+  private histoMaxY = 100;
+  private widthPlot: number;
+  private heightPlot: number;
   private scales = {};
   private gEls = {};
   private offset = {
@@ -76,43 +81,51 @@ export class StreamStatsComponent implements OnInit {
       .attr('height', dim.height)
       .attr('width', dim.width)
 
-    var heightPlot = dim.height - self.offset.top - self.offset.bottom;
-    var widthPlot = dim.width - self.offset.right - self.offset.left;
-    self.scales['x'] = d3.scaleLinear().range([0, widthPlot]).domain([5, 25]);
-    self.scales['y'] = d3.scaleLinear().range([heightPlot, 0]).domain([0, 1800]);
+    self.heightPlot = dim.height - self.offset.top - self.offset.bottom;
+    self.widthPlot = dim.width - self.offset.right - self.offset.left;
     self.gEls['plot'] = self.svg.append('g')
       .attr('transform', 'translate(' + self.offset.left + ', ' + self.offset.top + ')');
 
-    self.svg.append("g")
+    self.elXAxis = self.svg.append("g")
       .attr("class", "histo x axis")
-      .attr("transform", 'translate(' + self.offset.left + ',' + (heightPlot + self.offset.top) + ")")
-      .call(d3.axisBottom()
-        .scale(self.scales['x'])
-        .tickFormat(function (d) {
-          return d + ':00';
-        })
-      );
-    self.svg.append("g")
+      .attr("transform", 'translate(' + self.offset.left + ',' + (self.heightPlot + self.offset.top) + ")")
+
+    self.elYAxis = self.svg.append("g")
       .attr("class", "histo y axis")
       .attr("transform", 'translate(' + self.offset.left + ',' + self.offset.top + ")")
-      .call(d3.axisLeft()
-        .scale(self.scales['y'])
-        .ticks(5)
-      );
+
+    self._updateScales();
 
     self.svg.append('text')
-      .attr('x', self.offset.left + widthPlot / 2)
+      .attr('x', self.offset.left + self.widthPlot / 2)
       .attr('y', 25)
       .attr('class', 'histo title')
       .text('Number of traveling vehicles vs time of day')
 
     self.gEls['evtPerSecond'] = self.svg.append('g')
       .attr('class', 'histo legend events-per-second')
-      .attr('transform', 'translate(' + (self.offset.left + widthPlot - 50) + ', ' + (self.offset.top +heightPlot/2) + ')');
+      .attr('transform', 'translate(' + (self.offset.left + self.widthPlot - 50) + ', ' + (self.offset.top + self.heightPlot / 2) + ')');
     self.gEls['evtPerSecond'].append('text')
       .attr('class', 'name')
       .text('acquisition rate: ')
       .attr('x', -4);
+  }
+
+  _updateScales() {
+    var self = this;
+    self.scales['x'] = d3.scaleLinear().range([0, self.widthPlot]).domain([5, 25]);
+    self.scales['y'] = d3.scaleLinear().range([self.heightPlot, 0]).domain([0, self.histoMaxY]);
+
+    self.elXAxis.call(d3.axisBottom()
+      .scale(self.scales['x'])
+      .tickFormat(function (d) {
+        return d + ':00';
+      })
+    );
+    self.elYAxis.call(d3.axisLeft()
+      .scale(self.scales['y'])
+      .ticks(5)
+    );
   }
 
 
@@ -120,8 +133,18 @@ export class StreamStatsComponent implements OnInit {
     const self = this;
     if (self.gEls['plot'] === undefined) {
       return;
-
     }
+    const max = _.chain(self.histoPoints)
+      .flatMap('dataPoints')
+      .map('count')
+      .max()
+      .value();
+    if(max > 0.98*self.histoMaxY){
+      self.histoMaxY = self.histoMaxY*1.5;
+      self._updateScales();
+    }
+
+
     const line = d3.line()
       .x(function (hp) {
         return self.scales['x'](hp.sod / 3600);
@@ -138,7 +161,7 @@ export class StreamStatsComponent implements OnInit {
 
     self.gEls['evtPerSecond'].selectAll('text.value')
       .text(function (d) {
-        return d +' evt/s';
+        return d + ' evt/s';
       });
 
     const gPlot = self.gEls['plot'];

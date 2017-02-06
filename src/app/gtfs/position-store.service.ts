@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {ServerSideEventsService} from '../server-side-events.service';
 import {SimulatedPosition} from './simulated-position'
-import {Observable} from "rxjs";
+import {Observable, Subscription} from "rxjs";
 import {AppState} from "../reducers/AppState";
 import {Store} from "@ngrx/store";
 import {SET_STREAM_STATS} from "../reducers/steam-stats.reducer";
@@ -22,6 +22,7 @@ export class PositionStoreService {
   private lastTimeMillis: number = 0;
   private latestSecondsOfDay: number;
   private obsPosition: Observable<SimulatedPosition>;
+  private subscription:Subscription;
   private eventSource: any;
   private bufferTimeInterval = 1000;
 
@@ -32,7 +33,7 @@ export class PositionStoreService {
     const self = this;
     self.store.select<MapCoordinates>('mapCoordinates').subscribe(mc =>
       self.setBoundCoordinates(mc)
-    )
+    );
     self._setupObservable()
   }
 
@@ -43,6 +44,7 @@ export class PositionStoreService {
       self.urlEndPoint = self.urlEndPoint+'&cityTransit=true&accelerationFactor=100'
       self.bufferTimeInterval = 200;
     }else{
+      self.urlEndPoint = self.urlEndPoint;//+'&cityTransit=true';
       self.bufferTimeInterval = 1000;
     }
     self._setupObservable()
@@ -52,6 +54,7 @@ export class PositionStoreService {
     const self = this;
     if (self.eventSource !== undefined) {
       self.eventSource.close();
+      self.subscription.unsubscribe();
     }
     self.eventSource = new EventSource(self.urlRoot + '/' + self.urlEndPoint);
 
@@ -60,14 +63,14 @@ export class PositionStoreService {
       self.eventSource.onerror = x => observer.error(x);
       return () => {
         self.eventSource.close();
+        self.subscription.unsubscribe();
       };
     }).map(function (x) {
       const dt = JSON.parse(x);
       return new SimulatedPosition(dt.secondsOfDay, dt.lat, dt.lng, dt.tripId, dt.routeShortName, dt.routeLongName, dt.routeType, dt.status);
     });
 
-
-    self.obsPosition.bufferTime(self.bufferTimeInterval).subscribe((sps: Array<SimulatedPosition>) => {
+    self.subscription = self.obsPosition.bufferTime(self.bufferTimeInterval).subscribe((sps: Array<SimulatedPosition>) => {
 
       /* build the ates position snapshots */
       const newIds = [];
