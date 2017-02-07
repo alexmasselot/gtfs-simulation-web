@@ -8,7 +8,6 @@ import {AppComponent} from './app.component';
 import {TestTickComponent} from './test-tick/test-tick.component';
 import {SimulatedPositionsComponent} from './gtfs/simulated-positions/simulated-positions.component';
 import {ServerSideEventsService} from './server-side-events.service';
-import {MapComponent} from './stamen/map/map.component';
 import {mapCoordinatesReducer} from './reducers/map-coordinates.reducer';
 import {MappedPositionsComponent} from './gtfs/mapped-positions/mapped-positions.component';
 import {TopoJsonMapComponent} from './map/topo-json-map/topo-json-map.component';
@@ -29,7 +28,6 @@ const appRoutes: Routes = [
     AppComponent,
     TestTickComponent,
     SimulatedPositionsComponent,
-    MapComponent,
     MappedPositionsComponent,
     TopoJsonMapComponent,
     StreamStatsComponent,

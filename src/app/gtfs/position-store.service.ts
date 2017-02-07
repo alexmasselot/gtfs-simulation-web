@@ -10,6 +10,7 @@ import {SET_UPDATE_SECONDS_OF_DAY} from "../reducers/latest-seconds-of-day.reduc
 import {SimulatedPositionSnapshot} from "./simulated-position-snapshot";
 import {UPDATE_POSITIONS} from "../reducers/simulated-position-snapshot.reducer";
 import {MapCoordinates} from "../models/map-coordinates";
+import {environment} from "../../environments/environment";
 
 declare const _: any;
 declare const EventSource: any;
@@ -26,8 +27,8 @@ export class PositionStoreService {
   private eventSource: any;
   private bufferTimeInterval = 1000;
 
-  private urlRoot = 'http://localhost:9000/simulator';
-  private urlEndPoint = 'positions-ch'
+  private urlRoot = environment.api+'/simulator';
+  private urlEndPoint = 'positions-ch';
 
   constructor(private store: Store<AppState>) {
     const self = this;
