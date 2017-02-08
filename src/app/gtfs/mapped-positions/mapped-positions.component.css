@@ -1,3 +1,6 @@
+:host{
+  flex:1 100%;
+}
 div.map-container {
   height: 100%;
   width: 100%;

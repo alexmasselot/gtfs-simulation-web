@@ -1,0 +1,13 @@
+div.main-component{
+  display: flex;
+  flex-direction: column;
+  flex: 1 100%;
+}
+div.histogram{
+  height:200px;
+}
+div.map{
+  display:flex;
+  flex: 1 100%;
+
+}

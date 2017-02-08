@@ -19,6 +19,7 @@ import {latestSecondsOfDayReducer} from "./reducers/latest-seconds-of-day.reduce
 import {PositionStoreService} from "./gtfs/position-store.service";
 import {simulationPositionSnapshotReducer} from "./reducers/simulated-position-snapshot.reducer";
 import {Routes, RouterModule} from "@angular/router";
+import { LocationSelectorComponent } from './location-selector/location-selector.component';
 const appRoutes: Routes = [
   {path: '**', component: MappedPositionsComponent}
 ];
@@ -32,7 +33,8 @@ const appRoutes: Routes = [
     TopoJsonMapComponent,
     StreamStatsComponent,
     SimulatedPositionsPixiComponent,
-    ClockComponent
+    ClockComponent,
+    LocationSelectorComponent
   ],
   imports: [
     BrowserModule,
@@ -44,7 +46,7 @@ const appRoutes: Routes = [
       latestSecondsOfDay: latestSecondsOfDayReducer,
       simulatedPositionSnapshot: simulationPositionSnapshotReducer
     }),
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes,{ useHash: true })
   ],
   providers: [
     ServerSideEventsService,
