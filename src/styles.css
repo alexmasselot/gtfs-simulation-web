@@ -1,4 +1,6 @@
 /* You can add global styles to this file, and also import other style files */
+@import '~@angular/material/core/theming/prebuilt/deeppurple-amber.css';
+
 html, body, .viewport {
   width: 100%;
   margin: 0;
@@ -13,20 +15,14 @@ main {
 }
 app-root{
   display:flex;
+  flex-direction: column;
   flex:1 100%;
 }
 
 footer{
   height:30px;
-  background-color:lightgreen;
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  text-align: center;
-}
-header{
-  height:50px;
-  background-color:lightgreen;
+  background-color:rgb(0,36,88);
+  color:white;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -100,5 +96,5 @@ svg.topo-json-map g.feature.feature-lakes path   {
 svg.topo-json-map g.feature.feature-municipalities path{
   fill: none;
   stroke: #666;
-  stroke-width: .3;
+  stroke-width: .5;
 }

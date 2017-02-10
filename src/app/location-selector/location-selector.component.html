@@ -1,0 +1,24 @@
+<div class="level">
+  <md-radio-group
+    #inputLevel
+    [(ngModel)]="level"
+    (change)="changeLevel()"
+    >
+    <md-radio-button value="country">Country</md-radio-button>
+    <md-radio-button value="cantons">Canton</md-radio-button>
+    <md-radio-button value="municipalities">Municipality</md-radio-button>
+  </md-radio-group>
+</div>
+<div class="autocompleter">
+  <ng2-completer [(ngModel)]="locationName"
+                 [dataService]="dataService"
+                 [disableInput]="!searchData[level].length"
+                 [minSearchLength]="0"
+                 [placeholder]="searchData[level].length?'enter a name':'no choice available'"
+  ></ng2-completer>
+</div>
+<div class="submit">
+  <button md-mini-fab
+    (click)="submit()"
+  ><md-icon>replay</md-icon></button>
+</div>

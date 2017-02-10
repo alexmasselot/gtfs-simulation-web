@@ -53,11 +53,6 @@ export class SimulatedPositionsPixiComponent extends HasMapCoordinatesStore impl
     super(store);
     this.zone = new NgZone({enableLongStackTrace: false});
     this.timeLastAnimate = (new Date).getTime();
-
-    var clicks = Observable.fromEvent(document, 'click');
-    var buffered = clicks.bufferCount(2);
-    buffered.subscribe(x => console.log(x));
-
   }
 
   ngOnInit() {

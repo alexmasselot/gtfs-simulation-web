@@ -3,6 +3,9 @@ import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {HttpModule} from '@angular/http';
 import {StoreModule} from '@ngrx/store';
+import { MaterialModule } from '@angular/material';
+import { Ng2CompleterModule } from "ng2-completer";
+
 
 import {AppComponent} from './app.component';
 import {TestTickComponent} from './test-tick/test-tick.component';
@@ -40,6 +43,8 @@ const appRoutes: Routes = [
     BrowserModule,
     FormsModule,
     HttpModule,
+    MaterialModule.forRoot(),
+    Ng2CompleterModule,
     StoreModule.provideStore({
       mapCoordinates: mapCoordinatesReducer,
       streamStats: streamStatsReducer,

@@ -1,8 +1,22 @@
-<div class="main-component">
-  <div class="histogram">
-    <gtfssim-stream-stats></gtfssim-stream-stats>
+<header>
+  <div class="left">
+    <div>GTFS schedule simulator</div>
   </div>
-  <div class="map">
-    <router-outlet></router-outlet>
+  <div class="center">
+    <gtfssim-location-selector></gtfssim-location-selector>
   </div>
-</div>
+  <div class="right">
+    <div>Help</div>
+  </div>
+</header>
+
+<main>
+  <div class="main-component">
+    <div class="histogram">
+      <gtfssim-stream-stats></gtfssim-stream-stats>
+    </div>
+    <div class="map">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</main>
