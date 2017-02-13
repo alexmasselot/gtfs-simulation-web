@@ -29,6 +29,22 @@ footer{
   text-align: center;
 }
 
+footer a{
+  color:white;
+}
+footer a:visited{
+  color:lightgrey;
+}
+
+footer a {
+  vertical-align: bottom;
+  position: relative;
+}
+
+footer a i{
+  font-size:20px;
+}
+
 circle.vehicle {
   fill: red
 }

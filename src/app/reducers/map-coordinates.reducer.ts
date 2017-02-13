@@ -4,8 +4,7 @@ export const SET_CENTER = 'SET_CENTER';
 export const SET_DIMENSIONS = 'SET_DIMENSIONS';
 export const SET_GEOJSON = 'SET_GEOJSON';
 
-export const initMap = new MapCoordinates();
-export const mapCoordinatesReducer: ActionReducer<MapCoordinates> = (state: MapCoordinates = initMap, action: Action) => {
+export const mapCoordinatesReducer: ActionReducer<MapCoordinates> = function(state: MapCoordinates = new MapCoordinates(), action: Action){
   switch (action.type) {
     case SET_CENTER:
       return state;
