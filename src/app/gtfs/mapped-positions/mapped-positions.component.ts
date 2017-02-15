@@ -9,7 +9,7 @@ import {MapCoordinates} from "../../models/map-coordinates";
 import {PositionStoreService} from "../position-store.service";
 
 declare var d3: any;
-declare const _: any;
+import * as _ from 'lodash';
 
 @Component({
   selector: 'gtfssim-mapped-positions',

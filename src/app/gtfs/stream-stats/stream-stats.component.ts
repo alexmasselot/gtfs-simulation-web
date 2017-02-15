@@ -4,7 +4,7 @@ import {AppState} from "../../reducers/AppState";
 import {StreamStats} from "../../models/stream-stats";
 import {Observable} from "rxjs";
 
-declare const _: any;
+import * as _ from 'lodash';
 declare const d3: any;
 
 @Component({

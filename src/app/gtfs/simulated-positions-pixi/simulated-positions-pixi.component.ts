@@ -9,7 +9,7 @@ import {MapCoordinates} from "../../models/map-coordinates";
 import {SimulatedPositionSnapshot} from "../simulated-position-snapshot";
 import {Observable} from "rxjs";
 declare const PIXI: any;
-declare const _: any;
+import * as _ from 'lodash';
 
 @Component({
   selector: 'gtfssim-simulated-positions-pixi',

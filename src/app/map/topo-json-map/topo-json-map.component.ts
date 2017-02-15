@@ -6,7 +6,7 @@ import {MapCoordinates} from "../../models/map-coordinates";
 import {TopoJsonService} from "../topo-json.service";
 declare var d3: any;
 declare var topojson: any;
-declare const _: any;
+import * as _ from 'lodash';
 
 @Component({
   selector: 'gtfssim-topo-json-map',

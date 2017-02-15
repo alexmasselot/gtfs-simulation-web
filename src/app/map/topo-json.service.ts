@@ -4,7 +4,7 @@ import {Store} from "@ngrx/store";
 import {topojsonCH} from './data/topojson-ch';
 declare const d3: any;
 declare const topojson: any;
-declare const _: any;
+import * as _ from 'lodash';
 
 
 @Injectable()

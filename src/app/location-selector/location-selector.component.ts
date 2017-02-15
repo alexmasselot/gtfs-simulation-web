@@ -2,7 +2,7 @@ import {Component, OnInit} from "@angular/core";
 import {CompleterService, CompleterData} from "ng2-completer";
 import {TopoJsonService} from "../map/topo-json.service";
 import {Router, NavigationEnd} from "@angular/router";
-declare const _: any;
+import * as _ from 'lodash';
 
 @Component({
   selector: 'gtfssim-location-selector',

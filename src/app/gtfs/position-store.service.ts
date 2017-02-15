@@ -12,7 +12,7 @@ import {UPDATE_POSITIONS} from "../reducers/simulated-position-snapshot.reducer"
 import {MapCoordinates} from "../models/map-coordinates";
 import {environment} from "../../environments/environment";
 
-declare const _: any;
+import * as _ from 'lodash';
 declare const EventSource: any;
 
 @Injectable()
