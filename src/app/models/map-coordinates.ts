@@ -55,7 +55,8 @@ export class MapCoordinates {
   }
 
   setGeoJson(gj){
-    return new MapCoordinates(_.assign(this, {geoJson:gj}));
+    const m =  new MapCoordinates(_.assign(this, {geoJson:gj}));
+    return m
   }
 
   updateProjection() {

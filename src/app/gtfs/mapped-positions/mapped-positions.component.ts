@@ -31,7 +31,6 @@ export class MappedPositionsComponent extends HasMapCoordinatesStore implements 
     self.route.params.subscribe(p => {
       if (p['level'] === undefined) {
         self.store.dispatch({type: SET_GEOJSON, payload: self.topoJsonService.getFeature('country')})
-
       } else {
         var level = p['level'];
         var name = p['name'];
@@ -46,7 +45,6 @@ export class MappedPositionsComponent extends HasMapCoordinatesStore implements 
             throw 'MappedPositionsComponent: no feature anchor found in topojson structure. level=' + level + ' name=' + name;
           }
           self.store.dispatch({type: SET_GEOJSON, payload: ft});
-
         }
       }
     });
